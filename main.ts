@@ -1,7 +1,7 @@
 // The Excuse That Almost Works — make.fun bounty u-clever-harbor-75-the-excuse-that-almost-works-69fde8f5
-// Entry: the single line a gamer texts the boss to get out of work during GTA 6 launch week.
-// 101 characters (max 140), 20 words (max 20), one line, no trailing newline.
-// Writes to /output/entry.txt (or $OUTPUT_DIR/entry.txt locally).
+// Entry: the one line a gamer texts the boss to skip work during GTA 6 launch week.
+// 101 characters (limit 140), 20 words (limit 20). One line, no trailing newline.
+// Output goes to /output/entry.txt (or $OUTPUT_DIR/entry.txt when run locally).
 import { mkdirSync, writeFileSync } from "node:fs";
 
 const TEXT =
@@ -11,22 +11,28 @@ const TEXT =
 const LENGTH = [...TEXT].length;
 const WORDS = TEXT.split(/\s+/).filter((w) => w.length > 0).length;
 
-const PROBLEMS: string[] = [];
-if (LENGTH < 1 || LENGTH > 140) {
-  PROBLEMS.push(`entry must be 1-140 characters, got ${LENGTH}`);
+// Every rule violation is collected first so the failure message lists all of them.
+function collectProblems(): string[] {
+  const found: string[] = [];
+  if (LENGTH < 1 || LENGTH > 140) {
+    found.push(`entry must be 1-140 characters, got ${LENGTH}`);
+  }
+  if (WORDS > 20) {
+    found.push(`entry must be at most 20 words, got ${WORDS}`);
+  }
+  if (TEXT.includes("\n") || TEXT.includes("\r")) {
+    found.push("entry must be a single line with no line breaks");
+  }
+  if (TEXT.trim().length === 0) {
+    found.push("entry must not be only whitespace");
+  }
+  if (TEXT !== TEXT.trim()) {
+    found.push("entry must not have leading or trailing whitespace");
+  }
+  return found;
 }
-if (WORDS > 20) {
-  PROBLEMS.push(`entry must be at most 20 words, got ${WORDS}`);
-}
-if (TEXT.includes("\n") || TEXT.includes("\r")) {
-  PROBLEMS.push("entry must be a single line with no line breaks");
-}
-if (TEXT.trim().length === 0) {
-  PROBLEMS.push("entry must not be only whitespace");
-}
-if (TEXT !== TEXT.trim()) {
-  PROBLEMS.push("entry must not have leading or trailing whitespace");
-}
+
+const PROBLEMS = collectProblems();
 if (PROBLEMS.length > 0) {
   throw new Error(PROBLEMS.join("; "));
 }
